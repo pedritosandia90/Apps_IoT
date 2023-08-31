@@ -1,6 +1,8 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 
+Contador = 11
+
 class MyHTTPRequestHandler(BaseHTTPRequestHandler):
     def _set_response(self, content_type="text/plain"):
         self.send_response(200)
@@ -9,11 +11,21 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self._set_response()
-        self.wfile.write("Hello from the server!".encode())
+        respuesta = "El valor es: " + str(Contador)
+        self.wfile.write(respuesta.encode())
 
     def do_POST(self):
         content_length = int(self.headers["Content-Length"])
         post_data = self.rfile.read(content_length)
+        
+        body_json = json.loads(post_data.decode())
+        global Contador
+
+        if(body_json['action']=='asc'):
+            Contador += 1
+        elif(body_json['action']== 'Desc'):
+            Contador -= 1
+        
 
         # Print the complete HTTP request
         print("\n----- Incoming POST Request -----")
@@ -23,7 +35,7 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
         print("-------------------------------")
 
         # Respond to the client
-        response_data = json.dumps({"message": "Received POST data", "data": post_data.decode()})
+        response_data = json.dumps({"message": "Received POST data", "data": post_data.decode(),"status": "OK"})
         self._set_response("application/json")
         self.wfile.write(response_data.encode())
 
