@@ -25,7 +25,6 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
             Contador += 1
         elif(body_json['action']== 'Desc'):
             Contador -= 1
-        
 
         # Print the complete HTTP request
         print("\n----- Incoming POST Request -----")
