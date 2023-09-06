@@ -9,6 +9,10 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_header("Content-type", content_type)
         self.end_headers()
 
+    def throw_custom_error(self, message):
+        self._set_response("application/json")
+        self.wfile.write(json.dumps({"message": "Invalid JSON"}).encode())
+
     def do_GET(self):
         self._set_response()
         respuesta = "El valor es: " + str(Contador)
@@ -18,13 +22,37 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers["Content-Length"])
         post_data = self.rfile.read(content_length)
         
-        body_json = json.loads(post_data.decode())
+        try:
+            body_json = json.loads(post_data.decode())
+        except:
+            self.throw_custom_error("Invalid JSON")
+            return
+
         global Contador
 
-        if(body_json['action']=='asc'):
-            Contador += 1
+        #if(body_json['action']=='asc'):
+            #Contador += 1
+        #elif(body_json['action']== 'Desc'):
+            #Contador -= 1
+    
+        if (body_json.get('action') is None or body_json.get('quantity') is None):
+            self._set_response("application/json")
+            self.throw_custom_error("Missing action or quantity")
+            return
+        if (body_json['action'] != 'asc' and body_json['action'] != 'desc'):
+            self.throw_custom_error("Invalid action")
+            return
+        
+        try: 
+            int(body_json['quantity'])
+        except:
+            self.throw_custom_error("Invalidad quantity")
+            return
+        
+        if (body_json['action']=='asc'):
+            Contador += int(body_json['quantity'])
         elif(body_json['action']== 'Desc'):
-            Contador -= 1
+            Contador -= int(body_json['quantity'])
 
         # Print the complete HTTP request
         print("\n----- Incoming POST Request -----")
@@ -34,7 +62,8 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
         print("-------------------------------")
 
         # Respond to the client
-        response_data = json.dumps({"message": "Received POST data", "data": post_data.decode(),"status": "OK"})
+        #response_data = json.dumps({"message": "Received POST data", "data": post_data.decode(),"status": "OK"})
+        response_data = json.dumps({"contador": Contador})
         self._set_response("application/json")
         self.wfile.write(response_data.encode())
 
