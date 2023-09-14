@@ -1,7 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 
-# Inicializamos el contador en 11
+# Inicializamos el contador en 11 o en cualquier otro valor
 Contador = 11
 
 # Define una clase MyHTTPRequestHandler que hereda de BaseHTTPRequestHandler
@@ -33,7 +33,7 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
             return
 
         global Contador
-
+        
         # Verifica si se proporcionan 'action' y 'quantity' en el JSON
         if (body_json.get('action') is None or body_json.get('quantity') is None):
             self._set_response("application/json")
